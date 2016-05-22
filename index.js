@@ -163,7 +163,7 @@ Multiplex.prototype.createStream = function (name, opts) {
 
   var id = this._currentChannel;
   this._currentChannel++;
-  if (this._currentChannel > 100000000) {
+  if (this._currentChannel >= Number.MAX_SAFE_INTEGER) {
     this._currentChannel = 0;
   }
   var channel = new Channel(this._name(name || id.toString()), this, xtend(this._options, opts))
