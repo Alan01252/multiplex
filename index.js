@@ -135,8 +135,8 @@ var Multiplex = function (opts, onchannel) {
   this._corked = 0
   this._options = opts
   this._binaryName = !!opts.binaryName
-  this._local = []
-  this._remote = []
+  this._local = {}
+  this._remote = {}
   this._list = this._local
   this._receiving = null
   this._chunked = false
@@ -151,6 +151,7 @@ var Multiplex = function (opts, onchannel) {
   this._onwritedrain = null
   this._ondrain = []
   this._finished = false
+  this._currentChannel = 0
 
   this.on('finish', this._clear)
 }
@@ -159,8 +160,12 @@ inherits(Multiplex, stream.Duplex)
 
 Multiplex.prototype.createStream = function (name, opts) {
   if (this.destroyed) throw new Error('Multiplexer is destroyed')
-  var id = this._local.indexOf(null)
-  if (id === -1) id = this._local.push(null) - 1
+
+  var id = this._currentChannel;
+  this._currentChannel++;
+  if (this._currentChannel > 100000000) {
+    this._currentChannel = 0;
+  }
   var channel = new Channel(this._name(name || id.toString()), this, xtend(this._options, opts))
   return this._addChannel(channel, id, this._local)
 }
@@ -206,10 +211,10 @@ Multiplex.prototype._send = function (header, data) {
 }
 
 Multiplex.prototype._addChannel = function (channel, id, list) {
-  while (list.length <= id) list.push(null)
   list[id] = channel
   channel.on('finalize', function () {
     list[id] = null
+    delete list[id]
   })
 
   channel.open(id, list === this._local)
