@@ -164,7 +164,7 @@ Multiplex.prototype.createStream = function (name, opts) {
   var id = this._currentChannel;
   this._currentChannel++;
   if (this._currentChannel >= Number.MAX_SAFE_INTEGER) {
-    this._currentChannel = 0;
+     throw new Error('Max allowed number of channels per multiplexer reached')
   }
   var channel = new Channel(this._name(name || id.toString()), this, xtend(this._options, opts))
   return this._addChannel(channel, id, this._local)
