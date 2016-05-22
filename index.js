@@ -394,14 +394,17 @@ Multiplex.prototype._clear = function () {
   if (this._finished) return
   this._finished = true
 
-  var list = this._local.concat(this._remote)
+  var list = xtend(this._local, this._remote)
 
-  this._local = []
-  this._remote = []
+  this._local = {}
+  this._remote = {}
 
-  list.forEach(function (stream) {
-    if (stream) stream._destroy(null, false)
-  })
+  for (var property in list) {
+    if (list.hasOwnProperty(property)) {
+       var stream = list.property
+       if (stream) stream._destroy(null, false)
+    }
+  }
 
   this.push(null)
 }
