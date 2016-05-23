@@ -211,10 +211,14 @@ Multiplex.prototype._send = function (header, data) {
 }
 
 Multiplex.prototype._addChannel = function (channel, id, list) {
+
+  var that = this;
+
   list[id] = channel
   channel.on('finalize', function () {
     list[id] = null
     delete list[id]
+    delete that._local[id]
   })
 
   channel.open(id, list === this._local)
